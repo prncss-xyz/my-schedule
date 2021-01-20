@@ -10,6 +10,12 @@
   "description": "Custom script to calculate a personal daily schedule relative to sunset time and activate a LIFX lamp accordingly.",
   "homepage": "https://github.com/prncss-xyz/my-schedule",
   "license": "ISC",
+  "keywords": [
+    "lifx",
+    "bulb",
+    "lightbulb",
+    "schedule"
+  ],
   "dependencies": {
     "node-lifx-lan": "^0.4.3",
     "suncalc": "^1.8.0"
