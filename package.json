@@ -1,12 +1,14 @@
 {
   "name": "my-schedule",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": "Juliette Lamarche",
+  "email": "juliette.lamarche@princesse.xyz",
+  "description": "Custom script to calculate a personal daily schedule relative to sunset time and activate a LIFX lamp accordingly.",
+  "homepage": "https://github.com/prncss-xyz/my-schedule",
   "license": "ISC",
   "dependencies": {
     "node-lifx-lan": "^0.4.3",
