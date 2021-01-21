@@ -1,7 +1,7 @@
 # My Schedule
 
-Custom script to calculate a personal daily schedule relative to sunset time and
-activate a LIFX lamp accordingly.
+Custom script to calculate a personal daily schedule relative to local sunset time and
+activate a LIFX light accordingly.
 
 Concepts:
 - physical computing
@@ -21,10 +21,10 @@ Schedule is printed on standard output.
 ### Pranayama
 
 Inspired by a yoga breathing exercise. Light turns on to blue, giving user one minute
-to prepare. Then light increase and decrease in cycles with augment by a fixed ratio
-until reaching desired duration.  User is expected to synchronize breathing with 
-light. As the inhaling phase is shorter than exhaling phase, this will activate
-parasympathetic system.
+to prepare. Then light increase and decrease in cycles which length augment by a 
+fixed ratio until reaching desired duration.  User is expected to synchronize breathing 
+with light. As the inhaling phase is shorter than exhaling phase, this will activate
+parasympathetic system, helping to fall asleep.
 
 It is estimated that blue light exposure is not strong enough to impede sleeping.
 
@@ -32,5 +32,3 @@ It is estimated that blue light exposure is not strong enough to impede sleeping
 
 Light will simulate a sunrise transitioning from dim red reaching full power 
 cold white at set wake time.
-
-
