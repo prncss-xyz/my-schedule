@@ -9,9 +9,8 @@ const hour = 60 * minute;
 
 const user = {
   sleepDuration: 7 * hour,
-  eatingPeriod: 6.75 * hour,
-  latitude: 45.508889,
-  longitude: -73.561667,
+  latitude: 45.5544645,
+  longitude: -73.5494181
 };
 
 const eveningColor = {
@@ -43,40 +42,34 @@ const pranayamaParams = {
     out: 5,
     empty: 2
   },
-  a0: minute / 10,
-  aN: minute / 3.8,
-  rMax: 1.08,
+  a0: 6 * second,
+  aN: 15.7 * second,
+  n: 12,
   duration: 14 * minute,
-  pre: 1 * minute,
+  pre: minute
 };
 
-const sunriseParams = {
+const sunRiseParams = {
   kelvin: 6000,
   redPart: 0.3,
   duration: 20 * minute,
   anticipation: 1 * hour,
 };
 
-function calcWakeTime(sunrise) {
-  const midnight = new Date (sunrise);
-  midnight.setHours(0);
-  midnight.setMinutes(0);
-  midnight.setSeconds(0);
-  midnight.setMilliseconds(0);
-  return Math.min(
-    sunrise -sunriseParams.anticipation,
-    +midnight +6*hour
-  );
-}
+const day = new Date();
+const times0 = SunCalc.getTimes(day, user.latitude, user.longitude);
+day.setDate(day.getDate() + 1);
+const times1 = SunCalc.getTimes(day, user.latitude, user.longitude);
+day.setHours(0);
+day.setMinutes(0);
+day.setSeconds(0);
+day.setMilliseconds(0);
 
-const day0 = new Date();
-const times0 = SunCalc.getTimes(day0, user.latitude, user.longitude);
-const sleepTime = calcWakeTime(times0.sunrise) +24*hour -user.sleepDuration;
-
-const day1 = new Date();
-day1.setDate(day1.getDate() + 1);
-const times1 = SunCalc.getTimes(day1, user.latitude, user.longitude);
-const wakeTime = calcWakeTime(times1.sunrise);
+const wakeTime = Math.min(
+  times1.sunrise - sunRiseParams.anticipation,
+  +day + 6 * hour
+);
+const sleepTime = wakeTime - user.sleepDuration;
 
 // `duration` must be an integer between 0 and 65535
 const chunk = 65535;
@@ -91,11 +84,10 @@ const color = (kelvin, redPart, t) => ({
   )
 });
 
-async function sunrise({ kelvin, redPart, duration }) {
-  console.log("Sunrise starting.");
-
+async function sunRise({ kelvin, redPart, duration }) {
   const n = Math.floor(duration / chunk);
   const r = duration % chunk;
+  console.log("Sunrise starting.");
   Lifx.turnOnBroadcast({ color: color(kelvin, redPart, 0) });
   for (let i = 0; i < n; i++) {
     Lifx.setColorBroadcast({
@@ -108,13 +100,8 @@ async function sunrise({ kelvin, redPart, duration }) {
   await delay(r);
 }
 
-function calcPranayamaIntervals({ a0, aN, rMax, duration }) {
-  let r = aN / a0;
-  let n = 1;
-  while (r > rMax) {
-    ++n;
-    r = (aN / a0) ** (1 / n);
-  }
+function calcPranayamaIntervals({ a0, aN, n, duration }) {
+  const r = (aN / a0) ** (1 / n);
   const nTot = Math.round((duration - (a0 - r * aN) / (1 - r)) / aN) + n;
   intervals = Array(nTot);
   for (let i = 0; i < nTot; ++i) {
@@ -124,9 +111,10 @@ function calcPranayamaIntervals({ a0, aN, rMax, duration }) {
 }
 
 async function pranayama(
-  { a0, aN, rMax, duration, upColor, downColor, afterColor, cycle, pre },
+  { a0, aN, n, duration, upColor, downColor, afterColor, cycle, pre },
   dev
 ) {
+  // console.log(dev);
   console.log("Test");
   if (!dev) {
     console.log("Device expected.");
@@ -138,9 +126,8 @@ async function pranayama(
     return;
   }
   console.log("Pranayama starting.");
-
   const total = cycle.in + cycle.full + cycle.out + cycle.empty;
-  const pranayamaIntervals = calcPranayamaIntervals({ a0, aN, rMax, duration });
+  const pranayamaIntervals = calcPranayamaIntervals({ a0, aN, n, duration });
   await Lifx.turnOnBroadcast({ color: downColor });
   if (pre) await delay(pre);
   for (const period of pranayamaIntervals) {
@@ -191,9 +178,10 @@ function printEvents(events) {
 
 let dev;
 
+const eatingPeriod = 6.75 * hour;
 const a = 2 * hour;
-const b = (Math.sqrt(a * (4 * user.eatingPeriod - 3 * a)) - a) / 2;
-calcPranayamaIntervals(pranayamaParams);
+const b = (Math.sqrt(a * (4 * eatingPeriod - 3 * a)) - a) / 2;
+
 printEvents([
   ["Shower", sleepTime - 2 * hour],
   ["Pranayama", sleepTime - pranayamaParams.duration],
@@ -202,13 +190,12 @@ printEvents([
   ["Meal 0", wakeTime + hour],
   ["Meal 1", wakeTime + hour + a],
   ["Meal 2", wakeTime + hour + a + b],
-  ["Meal 3", wakeTime + hour + user.eatingPeriod],
+  ["Meal 3", wakeTime + hour + eatingPeriod],
   ["Sunset", times0.sunset],
   ["Sunrise", times1.sunrise],
   ["Solar noon", times1.solarNoon],
   ["Golden hour", times1.goldenHour]
 ]);
-
 (async () => {
   [dev] = await detect();
   setTimeOrRun(
@@ -219,5 +206,6 @@ printEvents([
     () => pranayama(pranayamaParams, dev),
     sleepTime - pranayamaParams.duration
   );
-  setTime(() => sunrise(sunriseParams), wakeTime - sunriseParams.duration);
+  setTime(() => sunRise(sunRiseParams), wakeTime - sunRiseParams.duration);
+  // await pranayama(pranayamaParams, dev);
 })();

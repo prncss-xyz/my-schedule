@@ -21,7 +21,7 @@ Schedule is printed on standard output.
 ### Pranayama
 
 Inspired by a yoga breathing exercise. Light turns on to blue, giving user one minute
-to prepare. Then light increase and decrease in cycles which length augment by a 
+to prepare. Then light increase and decrease in cycles which duration augment by a 
 fixed ratio until reaching desired duration.  User is expected to synchronize breathing 
 with light. As the inhaling phase is shorter than exhaling phase, this will activate
 parasympathetic system, helping to fall asleep.
